@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="WX.Utilities.Downloader.View.UC_FinishedTaskes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../Resources/Resources.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="36"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal">
+      <Button Content="删除" Width="60" Command="{Binding CMD_Delete}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
+    </StackPanel>
+    <ListView Grid.Row="1" ItemsSource="{Binding D_DownloadedFiles}" SelectedItem="{Binding D_DownloadedFile}" ItemContainerStyle="{StaticResource ListViewItemContainerStyle}">
+      <ListView.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="打开文件" Command="{Binding CMD_File}"/>
+          <MenuItem Header="打开文件夹" Command="{Binding CMD_Folder}"/>
+        </ContextMenu>
+      </ListView.ContextMenu>
+      <ListView.View>
+        <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+          <GridView.Columns>
+            <GridViewColumn>
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <Image/>
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn DisplayMemberBinding="{Binding FileName}" Width="250"/>
+            <GridViewColumn DisplayMemberBinding="{Binding FileSize}" Width="80"/>
+            <GridViewColumn DisplayMemberBinding="{Binding ElapsedTime}" Width="100"/>
+            <GridViewColumn DisplayMemberBinding="{Binding FinishedTime,StringFormat='yyyy-MM-dd HH:mm:ss'}" />
+          </GridView.Columns>
+        </GridView>
+      </ListView.View>
+    </ListView>
+  </Grid>
+</UserControl>
