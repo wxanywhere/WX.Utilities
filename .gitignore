@@ -1,1 +1,5 @@
 # git ignore file
+bin/
+obj/
+*.user
+*.suo
