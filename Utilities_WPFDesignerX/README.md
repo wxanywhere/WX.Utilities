@@ -1,4 +1,4 @@
-WX.Utilities.WPFDesingerX
+WPF desinger extension
 =
 
  ![](WX.Utilities.WPFDesignerXA.JPG)
