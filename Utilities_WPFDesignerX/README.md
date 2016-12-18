@@ -1,4 +1,6 @@
 WX.Utilities.WPFDesingerX
 =
 
-
+ ![](WX.Utilities.WPFDesignerXA.JPG)
+ ![](WX.Utilities.WPFDesignerXB.JPG)
+ ![](WX.Utilities.WPFDesignerXC.JPG)
