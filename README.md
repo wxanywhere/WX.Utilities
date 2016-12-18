@@ -3,7 +3,7 @@ WX.Utilities
 
 * PayPal donate
 
-    [Donate](https://paypal.me/XXB/25usd)
+    [Donate](https://paypal.me/XXB/25usd?_blank)
 
 
 
