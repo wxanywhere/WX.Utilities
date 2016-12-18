@@ -1,7 +1,7 @@
 WX.Utilities
 ============
 
-* paypal donate
+* PayPal donate
 
     [Donate](https://paypal.me/XXB/25usd)
 
