@@ -1,0 +1,111 @@
+﻿<Window x:Class="WX.Utilities.WPFDesignerX.BusinessEditor.MainWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d" 
+             x:Name="root"
+         Background="White"
+             Height="380" Width="480" Title="{Binding Title}"  Icon="Resources/Image/Logo.ico">
+    <Window.Resources>
+        <ResourceDictionary Source="Resources/Resources.xaml"/>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="42"/>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" Margin="0">
+            <TabItem Header="需求描述" >
+                <DockPanel LastChildFill="True">
+                    <StackPanel  Orientation="Horizontal"  Height="36" DockPanel.Dock="Top">
+                        <Button IsEnabled="False" Command="{Binding CMD_RequirementImport}"  Margin="0" Style="{StaticResource ButtonImageStyle}" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Image/Import.png" Width="16" Height="16"/>
+                                <TextBlock Text="导入"  Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBox Margin="0" IsReadOnly="{Binding IsReadOnlyXQMS}" Text="{Binding Annotation.RequirementDescription,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" 
+                         AutoWordSelection="True" VerticalScrollBarVisibility="Auto" Foreground="Black"/>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="行为描述">
+                <DockPanel LastChildFill="True">
+                    <StackPanel Orientation="Horizontal"  Height="36" DockPanel.Dock="Top">
+                        <Button IsEnabled="False" Command="{Binding CMD_FWImport}"  Margin="0" Style="{StaticResource ButtonImageStyle}" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Image/Import.png" Width="16" Height="16"/>
+                                <TextBlock Text="导入"  Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBox Margin="0" IsReadOnly="{Binding IsReadOnlyXWMS}" Text="{Binding Annotation.BehaviorDescription,UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" 
+                         AutoWordSelection="True" VerticalScrollBarVisibility="Auto"  Foreground="Black"/>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="服务描述">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" >
+                        <Button Command="{Binding CMD_FWAppend}" Margin="0" Style="{StaticResource ButtonImageStyle}" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Image/Append.png" Width="16" Height="16"/>
+                                <TextBlock Text="添加服务"  Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding CMD_FWRemove}" Margin="0" Style="{StaticResource ButtonImageStyle}" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Image/Remove.png" Width="16" Height="16"/>
+                                <TextBlock Text="移出服务"  Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button IsEnabled="False" Command="{Binding CMD_FWRelationship}" Margin="0" Style="{StaticResource ButtonImageStyle}" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Image/Detail.png" Width="16" Height="16"/>
+                                <TextBlock Text="关联信息"  Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <DataGrid Grid.Row="2"  Margin="0" ItemsSource="{Binding D_ServiceInfoView}" SelectedItem="{Binding D_ServiceInfoSelected}"
+                              CanUserAddRows="False" SelectionMode="Single"
+                              SelectionUnit="FullRow" AutoGenerateColumns="False" HeadersVisibility="All">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding CMD_FWView}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn >
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox DataContext="{Binding DataContext,ElementName=root}" IsChecked="{Binding IsCheckedAllFW}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsChecked,UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn IsReadOnly="True" Binding="{Binding ServiceName}" Header="服务名称"/>
+                            <DataGridTextColumn IsReadOnly="True" Binding="{Binding ServiceCodeChangedTypeX}" Header="代码变更类型"/>
+                            <DataGridTextColumn IsReadOnly="True" Binding="{Binding ServiceDescription}"  Header="服务描述"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label Content="界面设计信息已更改，需要保存！" DataContext="{Binding Annotation}" Visibility="{Binding IsDirtyOfUIInfo,Mode=TwoWay, Converter={StaticResource ConverterBoolToVisibility}}" Foreground="Red" Margin="0,0,0,0" VerticalAlignment="Center"/>
+            <Button Content="选项" Height="23" Margin="10,0,10,0" Command="{Binding CMD_XX}"/>
+            <Button Content="保存" Height="23" Margin="10,0,10,0" Command="{Binding CMD_Save}"/>
+            <Button Content="保存关闭" Command="{Binding CMD_SaveClose}" Height="23" Margin="10,0,10,0"/>
+            <Button Content="关闭" Command="{Binding CloseCommand}" Height="23" Margin="10,0,10,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

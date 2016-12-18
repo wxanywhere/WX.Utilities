@@ -1,0 +1,711 @@
+﻿
+WX： 
+可通过AttachedDependencyProperty, 传递的实例判断控件类型，然后根据控件类型打印窗口
+
+Printing hidden window in WPF
+http://stackoverflow.com/questions/4452578/printing-hidden-window-in-wpf
+I have a Window object I'd like to create, set some values on, and then send straight to the printer without showing it. I thought this was the right stuff to do it, but shows a blank doc. 
+PrintDialog dlg = new PrintDialog();
+ReportWindow rw = new ReportWindow(); //WPF Window object
+var sz = new Size(96*8.5, 96*11);     //size of a paper page, 8.5x11
+rw.Measure(sz); rw.Arrange(new Rect(sz)); 
+//   rw.Show();  //want to keep it hidden
+dlg.PrintVisual(rw, "report printout");
+rw.Close(); 
+
+To verify the printing code is ok, i put it inside the form Loaded event, call Show(), and it works fine. 
+
+
+WPF：为什么需要Measure和Arrange两步？
+http://www.cnblogs.com/mgen/archive/2012/08/07/2626955.html
+class MyPanel : Panel
+{
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var retSize = new Size();
+        foreach (UIElement ui in InternalChildren)
+        {
+            ui.Measure(new Size(availableSize.Width, availableSize.Height));
+            retSize.Height += ui.DesiredSize.Height;
+            retSize.Width = Math.Max(retSize.Width, ui.DesiredSize.Width);
+        }
+        return retSize;
+    }
+ 
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        var next = new Point();
+        foreach (UIElement ui in InternalChildren)
+        {
+            ui.Arrange(new Rect(next, ui.DesiredSize));
+            next.Y += ui.RenderSize.Height;
+ 
+        }
+        return finalSize;
+    }
+}
+
+WPF：使用RenderTargetBitmap和DrawingVisual为图片添加简单的水印
+http://www.cnblogs.com/mgen/archive/2012/05/20/2509365.html
+ 
+ 　　下面程序代码，除了需要WPF中常用命名空间外，还需要读者加入如下命名空间：
+
+using System.Windows.Media.Imaging; 
+
+//WPF图像类型
+
+using System.IO;
+
+//文件/路径相关操作 
+　　首先根据图像路径，读取图像文件，就是创建WPF中的图像的基础类型BitmapSource对象，接着创建RenderTargetBitmap对象，使用BitmapSource中图像的属性。最后像素类型有一个特例，必须使用PixelFormats.Default而不是BitmapSource的Format属性。因为目前RenderTargetBitmap只支持Pbgra32类型。而有时BitmapSource的Format会是Bgr32或者其他像素格式。
+
+　　代码：
+
+//图像文件路径
+
+var path = @"E:\Users\Mgen\Pictures\mgenx.jpg";
+
+//读取图像
+
+BitmapSource bitmap = new BitmapImage(new Uri(path, UriKind.Absolute));
+
+//创建RenderTargetBitmap
+
+var rtbitmap = new RenderTargetBitmap(bitmap.PixelWidth,
+
+    bitmap.PixelHeight,
+
+    bitmap.DpiX,
+
+    bitmap.DpiY,
+
+    PixelFormats.Default);
+　　接着需要构建界面元素了，因为RenderTargetBitmap的核心是将Visual输出到图像，那么此时我们就开始构建Visual了。此时使用DrawingVisual，然后通过RenderOpen方法获取DrawingContext，把图像和文字输出上去。
+
+　　首先创建FormattedText对象来做水印：
+
+//生成FormattedText
+
+var text = new FormattedText("Mgen!",
+
+    System.Globalization.CultureInfo.CurrentCulture,
+
+     System.Windows.FlowDirection.LeftToRight,
+
+     new Typeface(SystemFonts.MessageFontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+
+     24,
+
+     Brushes.White);
+　　接下来使用DrawingVisual和DrawingContext进行绘图，把图像和FormattedText输出：
+
+//DrawingVisual和DrawingContext
+
+var drawingVisual = new DrawingVisual();
+
+using (var dc = drawingVisual.RenderOpen())
+
+{
+
+    dc.DrawImage(bitmap, new Rect(0, 0, bitmap.Width, bitmap.Height));
+
+    dc.DrawRectangle(Brushes.Transparent, new Pen(Brushes.White, 7), new Rect(10, 10, 20 + text.Width, 20 + text.Height));
+
+    dc.DrawText(text, new Point(20, 20));
+
+}
+　　OK，完成后，调用RenderTargetBitmap的Render方法就可以了，传入刚才的DrawingVisual对象：
+
+　　//调用RenderTargetBitmap的Render
+
+　　rtbitmap.Render(drawingVisual);
+
+　　最后使用BitmapDecoder把RenderTargetBitmap(也属于BitmapSource)保存至文件就可以了：
+
+//创建Decoder
+
+var bitmapEncoder = new JpegBitmapEncoder();
+
+//加入第一帧
+
+bitmapEncoder.Frames.Add(BitmapFrame.Create(rtbitmap));
+
+//保存至文件（不会修改源文件，将修改后的图片保存至程序目录下）
+
+bitmapEncoder.Save(File.OpenWrite(Path.GetFileName(path)));
+
+0
+
+RenderTargetBitmap Class
+http://msdn.microsoft.com/en-us/library/ms653503.aspx
+using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Globalization;
+
+namespace SDKSample
+{
+    public partial class RenderTargetBitmapExample : Page
+    {
+        public RenderTargetBitmapExample()
+        {
+
+            Image myImage = new Image();
+            FormattedText text = new FormattedText("ABC",
+                    new CultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface(this.FontFamily, FontStyles.Normal, FontWeights.Normal, new FontStretch()),
+                    this.FontSize,
+                    this.Foreground);
+
+            DrawingVisual drawingVisual = new DrawingVisual();
+            DrawingContext drawingContext = drawingVisual.RenderOpen();
+            drawingContext.DrawText(text, new Point(2, 2));
+            drawingContext.Close();
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(180, 180, 120, 96, PixelFormats.Pbgra32);
+            bmp.Render(drawingVisual);
+            myImage.Source = bmp;
+
+            // Add Image to the UI
+            StackPanel myStackPanel = new StackPanel();
+            myStackPanel.Children.Add(myImage);
+            this.Content = myStackPanel;
+        }
+    }
+}
+
+  
+  HwndSource & the Adorner layer
+http://social.msdn.microsoft.com/Forums/en/wpf/thread/8e4d9664-0f4f-4deb-a93e-ce60bfaea266
+
+Okay, finally figured out some code which works.  
+
+The algorithm to draw a visual along with any overlaying adorners to a bitmap is: 
+1.From the target element, walk up the visual tree to find the closest AdornerDecorator
+2.Use RenderTargetBitmap and VisualBrush to render the rectangle within the AdornerDecorator which contains the target element.
+
+The only shortcoming of this mechanism is that if your adorners draw outside the bounds of the target element's rectangle (often done for resizing handles etc), they will be clipped.
+
+Here's the code:
+
+       public static BitmapSource CreateBitmapFromElement(FrameworkElement element, Double dpiX, Double dpiY)
+        {
+            Size elementSize = new Size(element.ActualWidth, element.ActualHeight);
+            Visual root = GetAdornerDecoratorAncestor(element);
+            Rect elementBounds  = element.TransformToAncestor(root).TransformBounds(new Rect(elementSize));
+
+            RenderTargetBitmap rtb = new RenderTargetBitmap((Int32)(elementBounds.Size.Width * dpiX / 96.0),
+                                           (Int32)(elementBounds.Size.Height * dpiY / 96.0),
+                                           dpiX,
+                                           dpiY,
+                                           PixelFormats.Pbgra32);
+
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen())
+            {
+                VisualBrush vb = new VisualBrush(root);
+                vb.ViewboxUnits = BrushMappingMode.Absolute;
+                vb.Stretch = Stretch.None;
+                vb.Viewbox = elementBounds;
+                dc.DrawRectangle(vb, null, new Rect(new Point(), elementBounds.Size));
+            }
+            rtb.Render(dv);
+            return rtb;
+        }
+
+        public static Visual GetAdornerDecoratorAncestor(DependencyObject obj)
+        {            
+            while(obj != null && !(obj is AdornerDecorator))
+            {
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+            return obj as AdornerDecorator;
+        }
+
+
+
+How to save to WPF FrameworkElement’s content as Image?
+http://www.dotnetspider.com/resources/42226-How-save-WPF-FrameworkElement-s-content.aspx
+        public static void SaveImage(string fileName, FrameworkElement element)
+        {
+            string imageExtension = new FileInfo(fileName).Extension.ToLower(CultureInfo.InvariantCulture);
+
+            BitmapEncoder imgEncoder = null;
+            switch (imageExtension)
+            {
+                case ".bmp":
+                    imgEncoder = new BmpBitmapEncoder();
+                    break;
+
+                case ".jpg":
+                case ".jpeg":
+                    imgEncoder = new JpegBitmapEncoder();
+                    break;
+
+                case ".png":
+                    imgEncoder = new PngBitmapEncoder();
+                    break;
+
+                case ".gif":
+                    imgEncoder = new GifBitmapEncoder();
+                    break;
+
+                case ".tif":
+                case ".tiff":
+                    imgEncoder = new TiffBitmapEncoder();
+                    break;
+
+                case ".wdp":
+                    imgEncoder = new WmpBitmapEncoder();
+                    break;
+
+                default:
+                    imgEncoder = new BmpBitmapEncoder();
+                    break;
+            }
+
+            if (element != null)
+            {
+                RenderTargetBitmap bmpSource = new RenderTargetBitmap((int)element.ActualWidth, (int)element.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                bmpSource.Render(element);
+
+                imgEncoder.Frames.Add(BitmapFrame.Create(bmpSource));
+                using (Stream stream = File.Create(fileName))
+                {
+                    imgEncoder.Save(stream);
+                    stream.Close();
+                }
+            }
+        }
+
+
+Save WPF Control as PNG image  
+http://www.vistax64.com/avalon/180411-save-wpf-control-png-image.html
+        public static ImageSource ToImageSource(FrameworkElement obj)
+        {
+            // Save current canvas transform
+            Transform transform = obj.LayoutTransform;
+            obj.LayoutTransform = null;
+            
+            // fix margin offset as well
+            Thickness margin = obj.Margin;
+            obj.Margin = new Thickness(0, 0,
+                 margin.Right - margin.Left, margin.Bottom - margin.Top);
+
+            // Get the size of canvas
+            Size size = new Size(obj.Width, obj.Height);
+            
+            // force control to Update
+            obj.Measure(size);
+            obj.Arrange(new Rect(size));
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(
+                (int)obj.Width, (int)obj.Height, 96, 96, PixelFormats.Pbgra32);
+            
+            bmp.Render(obj);
+
+            // return values as they were before
+            obj.LayoutTransform = transform;
+            obj.Margin = margin;
+            return bmp;
+        }
+
+
+WPF Diagramming. Saving you canvas to image, XPS document or raw Xaml. 
+http://denisvuyka.wordpress.com/2007/12/03/wpf-diagramming-saving-you-canvas-to-image-xps-document-or-raw-xaml/
+http://denisvuyka.wordpress.com/2007/12/03/wpf-diagramming-saving-you-canvas-to-image-xps-document-or-raw-xaml/
+public void ExportToPng(Uri path, Canvas surface)
+{
+  if (path == null) return;
+
+  // Save current canvas transform
+  Transform transform = surface.LayoutTransform;
+  // reset current transform (in case it is scaled or rotated)
+  surface.LayoutTransform = null;
+
+  // Get the size of canvas
+  Size size = new Size(surface.Width, surface.Height);
+  // Measure and arrange the surface
+  // VERY IMPORTANT
+  surface.Measure(size);
+  surface.Arrange(new Rect(size));
+
+  // Create a render bitmap and push the surface to it
+  RenderTargetBitmap renderBitmap = 
+    new RenderTargetBitmap(
+      (int)size.Width, 
+      (int)size.Height, 
+      96d, 
+      96d, 
+      PixelFormats.Pbgra32);
+  renderBitmap.Render(surface);
+
+  // Create a file stream for saving image
+  using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
+  {
+    // Use png encoder for our data
+    PngBitmapEncoder encoder = new PngBitmapEncoder();
+    // push the rendered bitmap to it
+    encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+    // save the data to the stream
+    encoder.Save(outStream);
+  }
+
+  // Restore previously saved layout
+  surface.LayoutTransform = transform;
+}
+//-------------------------------------------
+Exporting canvas to XPS document 
+
+Actually this was the first I’ve started implementing for my application. I like XPS format very much because it is easy to maintain and integrate. Here’s the quick snippet of exporting your canvas to XPS 
+public void Export(Uri path, Canvas surface)
+{
+  if (path == null) return;
+
+  // Save current canvas transorm
+  Transform transform = surface.LayoutTransform;
+  // Temporarily reset the layout transform before saving
+  surface.LayoutTransform = null;
+
+  // Get the size of the canvas
+  Size size = new Size(surface.Width, surface.Height);
+  // Measure and arrange elements
+  surface.Measure(size);
+  surface.Arrange(new Rect(size));
+
+  // Open new package
+  Package package = Package.Open(path.LocalPath, FileMode.Create);
+  // Create new xps document based on the package opened
+  XpsDocument doc = new XpsDocument(package);
+  // Create an instance of XpsDocumentWriter for the document
+  XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc);
+  // Write the canvas (as Visual) to the document
+  writer.Write(surface);
+  // Close document
+  doc.Close();
+  // Close package
+  package.Close();
+
+  // Restore previously saved layout
+  surface.LayoutTransform = transform;
+}
+//-------------------------------------------
+Exporting canvas to the XAML 
+
+I’ll give you the most stupid sample that can be found everywhere 
+public void Export(Uri path, Canvas surface)
+    {
+      if (path == null) return;
+      if (surface == null) return;
+
+      string xaml = XamlWriter.Save(surface);
+      File.WriteAllText(path.LocalPath, xaml);
+    }
+
+
+
+0
+  
+  WPF - print during a loop
+  http://stackoverflow.com/questions/11035205/wpf-print-during-a-loop
+  OK
+
+I solved it.
+
+I removed all the dispatcher object methods so it runs on a single thread.
+
+To update the canvas, I used the canvas.UpdateLayout() method.
+
+I also ensured that the print had finished before updating the next canvas (the next iteration). 
+private void methodName()
+{
+    for (int i = 0; i < 2; i++)
+    {
+        updateTextBox(i.ToString());
+
+        this.canvas.UpdateLayout();
+
+        PrintDialog dialog = new PrintDialog();
+        dialog.PrintVisual(this.canvas, "ABC");
+
+        dialog.PrintQueue.Refresh();
+
+        while (dialog.PrintQueue.NumberOfJobs != 0)
+        {
+            bool isQueued = false;
+            foreach (var job in dialog.PrintQueue.GetPrintJobInfoCollection())
+            {
+                if (job.Name == "ABC")
+                    isQueued = true;
+            }
+
+            if (!isQueued)
+                break;
+
+            Thread.Sleep(500);
+            dialog.PrintQueue.Refresh();
+        }
+    }
+}
+
+private void updateTextBox(string text)
+{
+    txtTextBox.Text = text;
+}
+
+I also could have just done thread.sleep(3000) - this worked as it was enough time to ensure the print job had completed, but it was also a little bit 'hopeful' and I wanted something more secure.
+
+Thank you to everyone for your suggestions.
+
+
+
+  WPF PrintDialog.PrintVisual() doesn't print All the pages
+  http://social.msdn.microsoft.com/Forums/zh-CN/wpf/thread/8ebb07af-253b-46f5-949d-5230ecc1b53c
+	I am developing the WPF application to print WPF window contents. I am trying to print the WPF window [.xaml page] which contains the more than one pages of information.  I am using the below lines of code to print the WPF window content.  
+
+	Sample code: 
+
+		PrintDialog printDialog = new PrintDialog();
+
+		printDialog.PageRangeSelection =	PageRangeSelection.AllPages;
+
+		printDialog.UserPageRangeEnabled =true;
+
+		if (printDialog.ShowDialog() == true )
+		{
+
+			printDialog.PrintVisual(XamlPage,"Test Print");
+
+		}
+
+	where XamlPage is the .xaml page.		
+
+	It works fine for single page.  But it doesn't work, whenever I've tried to print the more than one page.   
+
+
+	Is there any way to print all the pages. 
+
+
+XPS Printing of an Adorner
+http://social.msdn.microsoft.com/forums/en-US/wpf/thread/ae8312df-9ed9-4c4c-951b-42cee5427afa/
+
+
+WPF 打印  CSDN Blog
+http://blog.csdn.net/dingdingju/article/details/6512828
+http://www.cnblogs.com/Jax/archive/2008/05/31/1211088.html
+            PrintDialog pDialog = new PrintDialog();
+            pDialog.PageRangeSelection = PageRangeSelection.AllPages;
+            pDialog.UserPageRangeEnabled = true;
+            pDialog.ShowDialog();
+
+            PrintDialog pDialog = new PrintDialog();
+            PrintTicket pt = pDialog.PrintTicket;   
+
+            if ((bool)pDialog.ShowDialog().GetValueOrDefault())
+            {
+                DrawingVisual vis = new DrawingVisual();
+                DrawingContext dc = vis.RenderOpen();
+                dc.DrawLine(new Pen(), new Point(0, 0), new Point(0, 1));
+                dc.Close();
+                pDialog.PrintVisual(vis, "Hello, world!");
+            }
+
+           EnumeratedPrintQueueTypes[] enumerationFlags = {EnumeratedPrintQueueTypes.Local,
+                                                          EnumeratedPrintQueueTypes.Shared};
+
+转自http://www.cnblogs.com/Jax/archive/2008/05/31/1211088.html
+
+
+            LocalPrintServer printServer = new LocalPrintServer();
+            PrintQueueCollection printQueuesOnLocalServer = printServer.GetPrintQueues(enumerationFlags);
+
+            foreach (PrintQueue printer in printQueuesOnLocalServer)
+            {
+                Console.WriteLine(""tThe shared printer " + printer.Name + " is located at " + printer.Location + ""n");
+            }
+
+
+如何打印wpf窗口?
+http://social.msdn.microsoft.com/Forums/zh-CN/wpfzhchs/thread/86478217-8e9e-4d4e-b186-6d2f7a8791df/
+
+楼主你好,
+你可以用 System.Windows.Controls.PrintDialog .PrintVisual方法来打印需要的内容.下面是一个ready-to-run sample:
+http://social.msdn.microsoft.com/Forums/en-US/wpf/thread/da8b9da0-7bbe-4d28-891f-e036f80022bd
+
+wpf 打印 之PirintVisual 
+
+PrintVisual 使用过WPF打印的人都非常熟悉, 但是在实际开发中的打印 往往需求比较多，PrintVisual不太灵活 而且只能单一页面打印
+
+不过有时候一些打印功能并不需要分页，但是需要适合比列的大小. 有时候常常Visual的大小过大，导致难以调整,
+
+重新扩展打印功能比较费时，居中选择 其实PrintVisual 还是挺不错的 简单方便
+
+这次开发也遇到这个打印大小问题,几次都想放弃Pirntvisual这个东西了
+
+但是在几次资料的查阅中， 还是找到了解决方法
+
+ myPanel.Measure(new Size(printDialog.PrintableAreaWidth, printDialog.PrintableAreaHeight));
+                   
+                    myPanel.Arrange(new Rect(new Point(0, 10),
+                      ink.DesiredSize));
+
+ 控件都有 Measures与Arrange  使用这个就能做到很好的调整
+
+
+
+关于打印窗口的问题,我上面的贴子我想可以解决了,现在是怎样获得窗口的图像,我想你可能是想把窗口裁成图片的形式保存在本地,这样的话,你可以用RenderTargetBitmap类来做,下面的link中的ExportToPng方法可以直接把UI元素转成图片保存在本地,当然你要稍微改一下参数.
+http://social.msdn.microsoft.com/Forums/en-US/wpf/thread/cad054fc-d3a2-4740-88b5-a452826c5e38
+
+
+http://stackoverflow.com/questions/14152308/canvas-print-wpf
+PrintDialog dialog = new PrintDialog();
+dialog.PrintVisual(lst , "print");
+
+<--Xaml -->
+<ListView Name="lst">
+    <Grid Name="grdPrint">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Canvas  Grid.Row="0"    >
+           .......
+        </Canvas>
+
+        <HListBox x:Name="lstImage" ItemsSource="{Binding IMG, Mode=TwoWay}" Grid.Row="1" IsHitTestVisible="True">
+            <HListBox.ItemTemplate>
+                <DataTemplate>
+                    <HImage Margin="0"  Width="590"  Height="590" Stretch="Fill" Source="{Binding IMG_PATH_NM, Converter={StaticResource StrUriConverter}}" Tag="{Binding IMG_PATH_NM}">
+                    </HImage>
+                </DataTemplate>
+            </HListBox.ItemTemplate>
+            <HListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center"  IsHitTestVisible="True"/>
+                </ItemsPanelTemplate>
+            </HListBox.ItemsPanel>
+        </HListBox>
+    </Grid>
+</ListView>
+
+This method will print the canvas to PNG file.
+public void ExportToPNG(string imgpath, Canvas surface)
+{
+    Uri path = new Uri(imgpath);
+
+    if (path == null)
+        return;
+    Transform transform = surface.LayoutTransform;
+    surface.LayoutTransform = null;
+
+    Size size = new Size(surface.Width, surface.Height);
+    surface.Measure(size);
+    surface.Arrange(new Rect(size));
+
+    RenderTargetBitmap renderBitmap =
+        new RenderTargetBitmap(
+        (int)size.Width,
+        (int)size.Height,
+        96d,
+        96d,
+        PixelFormats.Pbgra32);
+    renderBitmap.Render(surface);
+
+    using (FileStream outStream = new FileStream(path.LocalPath, FileMode.Create))
+    {
+        PngBitmapEncoder encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+        encoder.Save(outStream);
+    }
+    surface.LayoutTransform = transform;
+}
+
+
+
+
+WPF 打印实例
+http://www.pin5i.com/showtopic-wpf-print-example.html
+
+
+http://www.go4answers.com/Example/creategraphics-equivalent-wpf-129105.aspx
+Hi
+I am drawing an image as below in Windows form.
+using (Graphics g = videoFrame.CreateGraphics()) 
+{
+g.DrawImage(image, 0, 0, videoFrame.Width, videoFrame.Height);
+}
+Answer 2
+Hi DotNet_Work,
+
+Simply, use the 
+Image element and the 
+BitmapSource to draw a image  from the file. Please read the content of the links
+Yiling Lai shared.
+
+xaml:
+
+<Imagex:Name="image"/>
+
+code:
+
+   BitmapImage bitmapsource = new BitmapImage();
+   bitmapsource.BeginInit();
+   bitmapsource.UriSource = new Uri(@"...", ...); // The uri for the image file
+   bitmapsource.CacheOption=BitmapCacheOption.OnLoad;
+   bitmapsource.CreateOptions=BitmapCreateOptions.IgnoreImageCache;
+   bitmapsource.EndInit();
+   image.Source = bitmapsource;
+
+By the way, WPF provides some class - 
+WriteableBitmap class that can create an 
+ImageSource to the Image control from the pixel array. 
+RenderTargetBitmap class can render a 
+Visual object to image.
+
+Sincerely,
+
+Bob Bao 
+
+MSDN Subscriber Support in Forum 
+
+If you have any feedback on our support, please contact
+msdnmg@microsoft.com
+//---------------------------------------------------------------------------
+http://www.charlespetzold.com/blog/2008/11/030337.html
+....
+//---------------------------------------------------------------------------
+http://stackoverflow.com/questions/5968074/equivalent-creategraphics-in-wpf
+You would need to create a control that overrides OnRender and do your drawing in there. There isn't a way for you to draw onto another control, but a control can draw itself.
+
+Also, keep in mind that WPF uses retained graphics, so if you change something you need to invalidate the visual as needed.
+
+EDIT:
+
+Something like:
+public class MyControl : Control {
+
+    public MyControl() {
+       this.Rects = new ObservableCollection<Rect>();
+       // TODO: attach to CollectionChanged to know when to invalidate visual
+    }
+
+    public ObservableCollection<Rect> Rects { get; private set; }
+
+    protected override void OnRender(DrawingContext dc) {
+        SolidColorBrush mySolidColorBrush  = new SolidColorBrush();
+        mySolidColorBrush.Color = Colors.LimeGreen;
+        Pen myPen = new Pen(Brushes.Blue, 10);
+
+        foreach (Rect rect in this.Rects)
+            dc.DrawRectangle(mySolidColorBrush, myPen, rect);
+    }
+}
+
+
+
+How can i Draw Polygon object into Bitmap to save on disk
+http://social.msdn.microsoft.com/Forums/en-US/wpf/thread/cad054fc-d3a2-4740-88b5-a452826c5e38

@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="WX.Utilities.WPFDesignerX.TestApp.UC_Test"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             Background="White"
+             Height="350" Width="525" Extension.ID="473d257a-9a9d-45ca-a3cb-50400e034362">
+    <TabControl Margin="10">
+        <TabItem Header="ItemA" Extension.ID="104471b0-dc44-49a1-935c-718f86b26b89">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="356*"/>
+                    <ColumnDefinition Width="161*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Visibility="Hidden" Height="23" Width="100" Margin="128,120,128,176" Extension.ID="2da56ebc-b9a1-4171-b8cb-23dc239f3ca2"/>
+                <TreeView>
+                    <TreeViewItem x:Name="tviA" Header="工程组01" IsExpanded="True">
+                        <TreeViewItem Header="工程项目01" IsExpanded="True"/>
+                        <TreeViewItem Header="工程项目01" IsExpanded="True"/>
+                    </TreeViewItem>
+                    <TreeViewItem Header="工程组02" IsExpanded="True">
+                        <TreeViewItem Header="工程项目01" IsExpanded="True"/>
+                        <TreeViewItem Header="工程项目02" IsExpanded="True"/>
+                        <TreeViewItem Header="工程项目03" IsExpanded="True" HorizontalAlignment="Right" Width="333"/>
+                        <TreeViewItem Header="工程项目04" IsExpanded="True" Margin="0,0,74,0" Extension.ID="beca128f-d9fb-472a-b2de-767a9c5df8cc"/>
+                        <TreeViewItem Header="工程项目05" IsExpanded="True"/>
+                    </TreeViewItem>
+                    <TreeViewItem Header="工程组03" IsExpanded="True" Extension.ID="63b5e863-3492-4f4a-9ed4-40f9cb1c353a"/>
+                </TreeView>
+                <MenuItem Header="XXXXX" Margin="43,236,31,19" Extension.ID="c031c6c1-bb1d-48fd-8e5f-d6b8ac06177d" />
+                <Button  Height="23" Width="100" Grid.Column="1" Margin="10,146,42,99"  Extension.ID="29f197bd-47b0-4291-8db9-9014a79edb18" />
+            </Grid>
+        </TabItem>
+        <TabItem Header="ItemC" Height="23" VerticalAlignment="Top">
+            <StackPanel >
+                <TabControl Height="100">
+                    <TabItem Header="ItemC1A">
+                        <TabControl>
+                            <TabItem Header="C1AA">
+
+                            </TabItem>
+                            <TabItem Header="C1AB">
+
+                            </TabItem>
+                            <TabItem Header="C1A">
+
+                            </TabItem>
+                        </TabControl>
+                    </TabItem>
+                    <TabItem Header="ItemC1B">
+
+                    </TabItem>
+                </TabControl>
+                <TabControl Height="100">
+                    <TabItem Header="ItemC2A">
+
+                    </TabItem>
+                    <TabItem Header="ItemC2B">
+
+                    </TabItem>
+                </TabControl>
+            </StackPanel>
+
+        </TabItem>
+        <TabItem Header="ItemB" Extension.ID="5152758f-5cd1-4fb4-a254-468d49190d89">
+
+            <TabControl>
+                <TabItem Header="C1AA">
+                    <Button  Height="23" Width="100" Grid.Column="1" Margin="0,0,0,0"  Extension.ID="19f197bd-47b0-4291-8db9-9014a79edb19" />
+                </TabItem>
+                <TabItem Header="C1AB">
+
+                </TabItem>
+                <TabItem Header="C1AC">
+
+                </TabItem>
+            </TabControl>
+        </TabItem>
+    </TabControl>
+</UserControl>

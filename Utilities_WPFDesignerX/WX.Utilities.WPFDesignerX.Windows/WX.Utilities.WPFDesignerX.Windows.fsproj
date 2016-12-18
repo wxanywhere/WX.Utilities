@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>9e8335c0-625f-471f-8258-7edb517e2313</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>WX.Utilities.WPFDesignerX.Windows</RootNamespace>
+    <AssemblyName>WX.Utilities.WPFDesignerX.Windows</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>WX.Utilities.WPFDesignerX.Windows</Name>
+    <Win32Resource>
+    </Win32Resource>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>D:\Workspace\WX\Dev\WPFDesignerX\WX.Utilities.WPFDesignerX.Assemblies\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\WX.Utilities.WPFDesignerX.Windows.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <ItemGroup>
+    <Resource Include="Resources/BusinessEditor.gif" />
+    <Compile Include="Settings.fs" />
+    <Compile Include="TypeExtensionModule.fs" />
+    <Compile Include="DataHelperModule.fs" />
+    <Compile Include="EditorNumberAdorner.fs" />
+    <Compile Include="AnnotationAdorner.fs" />
+    <Compile Include="ElementHelper.fs" />
+    <Compile Include="Extension.fs" />
+    <Compile Include="XButton.fs" />
+    <Compile Include="Assembly.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WX.FModule">
+      <HintPath>..\WX.Utilities.WPFDesignerX.Assemblies\Debug\WX.FModule.dll</HintPath>
+    </Reference>
+    <Reference Include="WX.Utilities.WPFDesignerX.BusinessEditor.View">
+      <HintPath>..\WX.Utilities.WPFDesignerX.Assemblies\Debug\WX.Utilities.WPFDesignerX.BusinessEditor.View.dll</HintPath>
+    </Reference>
+    <Reference Include="WX.Utilities.WPFDesignerX.BusinessEditor.ViewLogic">
+      <HintPath>..\WX.Utilities.WPFDesignerX.Assemblies\Debug\WX.Utilities.WPFDesignerX.BusinessEditor.ViewLogic.dll</HintPath>
+    </Reference>
+    <Reference Include="WX.Utilities.WPFDesignerX.Common">
+      <HintPath>..\WX.Utilities.WPFDesignerX.Assemblies\Debug\WX.Utilities.WPFDesignerX.Common.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

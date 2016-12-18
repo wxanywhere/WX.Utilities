@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  xmlns:v="clr-namespace:WX.Utilities.WPFDesignerX.BusinessEditor"
+    xmlns:vm="clr-namespace:WX.Utilities.WPFDesignerX.BusinessEditor;assembly=WX.Utilities.WPFDesignerX.BusinessEditor.ViewLogic"
+                    >
+    <DataTemplate DataType="{x:Type vm:FVM_FWXZ_Add}">
+        <v:UC_FWXZ_Add />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:FVM_FWXZ_Modify}">
+        <v:UC_FWXZ_Modify  />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:FVM_FWXZ}">
+        <v:UC_FWXZ  />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:FVM_FWXX}">
+        <v:UC_FWXX  />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:FVM_FWGLXX}">
+        <v:UC_FWGLXX  />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:FVM_XX}">
+        <v:UC_XX  />
+    </DataTemplate>
+</ResourceDictionary>
+

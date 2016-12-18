@@ -1,0 +1,10 @@
+﻿<Application x:Class="WX.Utilities.WPFDesignerX.TestApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml"
+             >
+    <Application.Resources>
+        <!--<ResourceDictionary  Source="pack://application:,,,/WX.Utilities.WPFDesignerX.BusinessEditor.View;component/Resources/ViewModelTemplate.xaml" />-->
+        <!--<ResourceDictionary Source="/IDP3.Resource;Component/control/datapager.xaml"/>-->
+    </Application.Resources>
+</Application>

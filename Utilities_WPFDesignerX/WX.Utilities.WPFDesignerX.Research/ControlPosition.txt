@@ -1,0 +1,60 @@
+﻿
+WPF获取控件间的相对位置
+http://www.17aspx.com/html/wpf/2011/1107/4542.html
+我们知道WPF有着比较灵活的布局方式，关于某个控件的坐标，Canvas中的元素最简单，我们可以直接通过其GetLeft（）与GetTop方法来获取，但其它布局面板中的，以及存在于不同布局面板中的元素中间的相对位置就比较让我们头疼了，其实有简单方法的，不知你有没发现。
+ 
+1，获取元素相对于父控件的位置
+ 使用Vector VisualTreeHelper.GetOffset(Visual visual)方法，其会返回visual在其父控件中的偏移量，然后你再将返回值的Vector对象转换成Point对象就可以了
+ 
+2，获取元素相对于祖宗控件或子孙控件的位置
+ 使用元素的 GeneralTransform TransformToAncetor(Visual ancetor)方法与GeneralTransform TransformToDescendent(Visual descendent)，其返回元素相对于祖宗或子孙的GeneralTransform myGeneralTransform ，然后再使用Point thePoint= myGeneralTransform.Transform(new Point(0,0))得到的thePoint对象就是要找的值了。
+ 
+3，获取任意两个元素见的相对位置
+ 有两种方式：
+ 如果元素是Visual,可以使用元素的GeneralTransform TransformToVisual(Visual visual)方法，然后可以与上文第2点的方法从GeneralTransform 得到thePoint
+ 如果元素是UIElement，就更简单了，可以使用元素的TranslatePoint（Point pt, UIElement relativeTo)来得到元素上的pt点相对于relativeTo时的值，只有我们传入的pt为（0，0）那么就可以得到元素上（0，0）点的相对位置，即元素的相对位置 
+
+WPF获取控件位置
+http://www.cnblogs.com/shadan/archive/2012/06/11/2544650.html
+WPF中提供了多种布局方式，因此在布局中的定位相对于WinForm的绝对定位要灵活的多，在WPF中，控件均没有如WinForm中的Location属性，但是，对应的提供了各种设定与获取相对于承载元素的定位
+
+一般来说，Wpf中的布局控件大多都是相对定位(网格,流式,面板等),如果我们要改变控件在布局中的位置可以用Margin,Padding等类似HTML中的方式，虽然说这种方式在WinForm也可用，但是WPF中的布局方式与灵活性已经更接近与HTML了
+
+WPF中也保留了相对传统的布局方式，如在Canvas容器中可以用SetLeft(),SetTop()来绝对定位
+
+关于控件定位详细具体可参考 http://msdn.microsoft.com/zh-cn/library/ms751709.aspx
+
+下来我们来简单描述几种获取控件位置的方式，这也是很多新手容易纠结的地方
+
+1.获取鼠标在控件中的坐标
+
+　//在Mouse相关的事件中的方式  
+　 void item_MouseDown(object sender, MouseButtonEventArgs e)
+  {
+　　　　Point point = e.GetPosition(canvas); 
+　} 
+
+ //或者Mouse的静态方法GetPosition() 获取与指定元素相对的鼠标位置=>等同于上面 
+　 　　 Point point = Mouse.GetPosition(canvas); 
+
+
+　
+ 
+2.获取控件相对于另一控件的坐标   
+ 
+//将相对于此元素的某个点转换至相对于指定元素的坐标中
+void item_MouseDown(object sender, MouseButtonEventArgs e)
+ {
+      Rectangle rectangle =sender as Rectangle; 
+ 　　　Point point = rectangle.TranslatePoint(new Point(),canvas); 
+ } 
+ 
+3.获取控件在Window中的坐标
+ 
+Window window =  Window.GetWindow(canvas);
+Point  point  =  canvas.TransformToAncestor(window).Transform(new Point(0, 0)); 
+ 
+ 
+另外,c#中还提供了控件坐标与屏幕坐标之间的转换,PointFromScreen,PointToScreen,这些就不再一一说明了
+ 
+总之,根据实际情况选择最适合的方式来获取控件坐标或定位
